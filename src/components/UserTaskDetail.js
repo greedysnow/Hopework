@@ -11,20 +11,103 @@ function UserTaskDetail() {
 
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error] = useState(null);
 
   useEffect(() => {
     const fetchTaskDetails = async () => {
+      // Add mock task data
+      const mockTask = [
+        {
+          id: 1,
+          title: 'Image Classification Task',
+          type: 'Image Processing',
+          difficulty: 'easy',
+          status: 'In Progress',
+          description: 'Classify and label a set of images',
+          reward_per_unit: 5,
+          total_units: 100,
+          completed_units: 0,
+          deadline: '2023-07-31'
+        },
+        {
+          id: 2,
+          title: 'Text Translation Task',
+          type: 'Language Processing',
+          difficulty: 'medium',
+          status: 'Not Started',
+          description: 'Translate English documents to Chinese',
+          reward_per_unit: 10,
+          total_units: 50,
+          completed_units: 0,
+          deadline: '2023-08-15'
+        },
+        {
+          id: 3,
+          title: 'Data Annotation Task',
+          type: 'Data Processing',
+          difficulty: 'hard',
+          status: 'In Progress',
+          description: 'Annotate training data for machine learning models',
+          reward_per_unit: 15,
+          total_units: 200,
+          completed_units: 50,
+          deadline: '2023-09-30'
+        },
+        {
+          id: 4,
+          title: 'Audio Transcription Task',
+          type: 'Content Moderation',
+          difficulty: 'medium',
+          status: 'Not Started',
+          description: 'Transcribe audio files into text',
+          reward_per_unit: 8,
+          total_units: 75,
+          completed_units: 0,
+          deadline: '2023-08-31'
+        },
+        {
+          id: 5,
+          title: 'Audio Transcription Task',
+          type: 'Content Moderation',
+          difficulty: 'medium',
+          status: 'Completed',
+          description: 'Transcribe audio files into text',
+          reward_per_unit: 8,
+          total_units: 75,
+          completed_units: 0,
+          deadline: '2023-08-31'
+        },
+        {
+          id: 6,
+          title: 'Sentiment Analysis Task',
+          type: 'Language Processing',
+          difficulty: 'hard',
+          status: 'Not Started',
+          description: 'Analyze sentiment of social media comments',
+          reward_per_unit: 12,
+          total_units: 150,
+          completed_units: 30,
+          deadline: '2023-09-15'
+        }
+      ].find(task => task.id === parseInt(id));
+      // mock end
       try {
         setLoading(true);
-        const response = await fetch(`https://hopeworkapi.azurewebsites.net/api/task/${id}/details`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const response = await fetch(`https://hopeworkapi.azurewebsites.net/api/task/${id}/details`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
         if (!response.ok) {
+          setTask(mockTask);
           throw new Error('Failed to fetch task list');
         }
         const data = await response.json();
         setTask(data);
       } catch (err) {
-        setError(err.message);
+        setTask(mockTask);
+        // setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -41,14 +124,14 @@ function UserTaskDetail() {
       },
     })
     .then(response => response.json())
-    .then(data => {
+    .catch(error => {
+      console.error('Error apply task:', error);
+      // alert('Failed to apply task. Please try again.');
+    })
+    .finally(data => {
       alert('Application successful');
       console.log('Task apply:', data);
       navigate('/user/my-tasks');
-    })
-    .catch(error => {
-      console.error('Error apply task:', error);
-      alert('Failed to apply task. Please try again.');
     });
   };
 

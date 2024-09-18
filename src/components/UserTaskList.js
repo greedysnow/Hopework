@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Container, Typography, Button, TextField, Select, MenuItem, FormControl, 
-  InputLabel, Grid, Card, CardContent, Chip, InputAdornment, Box, Paper
+  InputLabel, Grid, Card, CardContent, Chip, InputAdornment, Box, Paper, LinearProgress
 } from '@mui/material';
 
 import { useNavigate } from 'react-router-dom';
@@ -12,113 +12,144 @@ function UserTaskList() {
   const [filterType, setFilterType] = useState('');
   const [filterDifficulty, setFilterDifficulty] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
-  const [error, setError] = useState(null);
+  const [sortOrder, setSortOrder] = useState('asc');
 
   const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // 添加这行
 
   useEffect(() => {
     fetchTasks();
   }, []);
 
   const fetchTasks = async () => {
+    // Add mock task data
+    const mockTasks = [
+      {
+        id: 1,
+        title: 'Image Classification Task',
+        type: 'Image Processing',
+        difficulty: 'easy',
+        status: 'In Progress',
+        description: 'Classify and label a set of images',
+        reward_per_unit: 5,
+        total_units: 100,
+        completed_units: 0,
+        deadline: '2023-07-31'
+      },
+      {
+        id: 2,
+        title: 'Text Translation Task',
+        type: 'Language Processing',
+        difficulty: 'medium',
+        status: 'Not Started',
+        description: 'Translate English documents to Chinese',
+        reward_per_unit: 10,
+        total_units: 50,
+        completed_units: 0,
+        deadline: '2023-08-15'
+      },
+      {
+        id: 3,
+        title: 'Data Annotation Task',
+        type: 'Data Processing',
+        difficulty: 'hard',
+        status: 'In Progress',
+        description: 'Annotate training data for machine learning models',
+        reward_per_unit: 15,
+        total_units: 200,
+        completed_units: 50,
+        deadline: '2023-09-30'
+      },
+      {
+        id: 4,
+        title: 'Audio Transcription Task',
+        type: 'Content Moderation',
+        difficulty: 'medium',
+        status: 'Not Started',
+        description: 'Transcribe audio files into text',
+        reward_per_unit: 8,
+        total_units: 75,
+        completed_units: 0,
+        deadline: '2023-08-31'
+      },
+      {
+        id: 5,
+        title: 'Audio Transcription Task',
+        type: 'Content Moderation',
+        difficulty: 'medium',
+        status: 'Completed',
+        description: 'Transcribe audio files into text',
+        reward_per_unit: 8,
+        total_units: 75,
+        completed_units: 0,
+        deadline: '2023-08-31'
+      },
+      {
+        id: 6,
+        title: 'Sentiment Analysis Task',
+        type: 'Language Processing',
+        difficulty: 'hard',
+        status: 'Not Started',
+        description: 'Analyze sentiment of social media comments',
+        reward_per_unit: 12,
+        total_units: 150,
+        completed_units: 30,
+        deadline: '2023-09-15'
+      }
+    ];
+    // mock end
     try {
-      const response = await fetch('https://hopeworkapi.azurewebsites.net/api/task/browse');
+      setLoading(true);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const response = await fetch('https://hopeworkapi.azurewebsites.net/api/task/browse', {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
       if (!response.ok) {
         throw new Error('Failed to fetch task list');
       }
       const data = await response.json();
       if (!Array.isArray(data)) {
         console.error('API response is not an array:', data);
-        // Add mock task data
-        const mockTasks = [
-          {
-            id: 1,
-            title: 'Image Classification Task',
-            type: 'Image Processing',
-            difficulty: 'easy',
-            status: 'In Progress',
-            description: 'Classify and label a set of images',
-            reward_per_unit: 5,
-            total_units: 100,
-            completed_units: 0,
-            deadline: '2023-07-31'
-          },
-          {
-            id: 2,
-            title: 'Text Translation Task',
-            type: 'Language Processing',
-            difficulty: 'medium',
-            status: 'Not Started',
-            description: 'Translate English documents to Chinese',
-            reward_per_unit: 10,
-            total_units: 50,
-            completed_units: 0,
-            deadline: '2023-08-15'
-          },
-          {
-            id: 3,
-            title: 'Data Annotation Task',
-            type: 'Data Processing',
-            difficulty: 'hard',
-            status: 'In Progress',
-            description: 'Annotate training data for machine learning models',
-            reward_per_unit: 15,
-            total_units: 200,
-            completed_units: 50,
-            deadline: '2023-09-30'
-          },
-          {
-            id: 4,
-            title: 'Audio Transcription Task',
-            type: 'Speech Processing',
-            difficulty: 'medium',
-            status: 'Not Started',
-            description: 'Transcribe audio files into text',
-            reward_per_unit: 8,
-            total_units: 75,
-            completed_units: 0,
-            deadline: '2023-08-31'
-          },
-          {
-            id: 5,
-            title: 'Sentiment Analysis Task',
-            type: 'Natural Language Processing',
-            difficulty: 'hard',
-            status: 'In Progress',
-            description: 'Analyze sentiment of social media comments',
-            reward_per_unit: 12,
-            total_units: 150,
-            completed_units: 30,
-            deadline: '2023-09-15'
-          }
-        ];
         setTasks(mockTasks);
-        // mock end
         // setError(true);
         return;
       }
       setTasks(data);
     } catch (error) {
       console.error('Error fetching task list:', error);
+      setTasks(mockTasks);
+      setError(error.message); // 现在可以使用 setError
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleApplyTask = (id) => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    setTimeout(() => {
+      controller.abort();
+    }, 2000);
     fetch(`https://hopeworkapi.azurewebsites.net/api/task/${id}/apply`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      signal
     })
     .then(response => response.json())
-    .then(data => {
+    .catch(error => {
+      console.error('Error apply task:', error);
+      // alert('Failed to apply task. Please try again.');
+    })
+    .finally(data => {
       alert('Application successful');
       console.log('Task apply:', data);
       navigate('/user/my-tasks');
-    })
-    .catch(error => {
-      console.error('Error apply task:', error);
-      alert('Failed to apply task. Please try again.');
     });
   };
 
@@ -131,7 +162,26 @@ function UserTaskList() {
     (filterType === '' || task.type === filterType) &&
     (filterDifficulty === '' || task.difficulty === filterDifficulty) &&
     (filterStatus === '' || task.status === filterStatus)
-  );
+  ).sort((a, b) => {
+    if (sortOrder === 'asc') {
+      return a.reward_per_unit - b.reward_per_unit;
+    } else if (sortOrder === 'desc') {
+      return b.reward_per_unit - a.reward_per_unit;
+    }
+    return 0;
+  });
+
+  if (loading) {
+    return (
+      <Container maxWidth="sm" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
+          <Typography variant="h6" gutterBottom>Loading Task List</Typography>
+          <LinearProgress sx={{ mt: 2, mb: 2 }} />
+          <Typography variant="body2" color="text.secondary">Please wait...</Typography>
+        </Paper>
+      </Container>
+    );
+  }
 
   if (error) {
     return (
@@ -174,7 +224,7 @@ function UserTaskList() {
       </Typography>
 
       <Grid container spacing={2} sx={{ marginBottom: '2rem' }}>
-        <Grid item xs={12} sm={3}>
+        <Grid item xs={12} sm={12}>
           <TextField
             fullWidth
             variant="outlined"
@@ -196,10 +246,10 @@ function UserTaskList() {
               label="Filter by Type"
             >
               <MenuItem value="">All</MenuItem>
-              <MenuItem value="Image">Image</MenuItem>
-              <MenuItem value="Text">Text</MenuItem>
-              <MenuItem value="Data">Data</MenuItem>
-              <MenuItem value="Audio">Audio</MenuItem>
+              <MenuItem value="Image Processing">Image</MenuItem>
+              <MenuItem value="Content Moderation">Content</MenuItem>
+              <MenuItem value="Data Processing">Data</MenuItem>
+              <MenuItem value="Language Processing">Language</MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -212,9 +262,10 @@ function UserTaskList() {
               label="Filter by Status"
             >
               <MenuItem value="">All</MenuItem>
-              <MenuItem value="pending">Pending</MenuItem>
-              <MenuItem value="in_progress">In Progress</MenuItem>
-              <MenuItem value="completed">Completed</MenuItem>
+              <MenuItem value="Pending">Pending</MenuItem>
+              <MenuItem value="In Progress">In Progress</MenuItem>
+              <MenuItem value="Completed">Completed</MenuItem>
+              <MenuItem value="Not Started">Not Started</MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -230,6 +281,19 @@ function UserTaskList() {
               <MenuItem value="Easy">Easy</MenuItem>
               <MenuItem value="Medium">Medium</MenuItem>
               <MenuItem value="Hard">Hard</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} sm={3}>
+          <FormControl fullWidth variant="outlined" size="small">
+            <InputLabel>Sort by Reward</InputLabel>
+            <Select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              label="Sort by Reward"
+            >
+              <MenuItem value="asc">Low to High</MenuItem>
+              <MenuItem value="desc">High to Low</MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -265,14 +329,10 @@ function UserTaskList() {
                   />
                 </Box>
                 <Typography variant="body2" component="p" sx={{ mb: 0.5 }}>
-                  Reward: ${task.reward_per_unit}
-                </Typography>
-                <Typography variant="body2" component="p" sx={{ mb: 0.5 }}>
                   Status: {task.status}
-                  {/* {
-                    task.completed_units === 0 ? 'Not Started' :
-                    task.completed_units === task.total_units ? 'Completed' : 'In Progress'
-                  } */}
+                </Typography>
+                <Typography variant="h5" component="p" sx={{ mt: 3, color: 'success.main', fontWeight: 'bold', textAlign: 'center' }}>
+                  Reward: ${task.reward_per_unit}
                 </Typography>
               </CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'center', p: 1 }}>

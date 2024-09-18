@@ -296,7 +296,7 @@ function CompanyTaskManagement() {
                       onClick={() => handleCancelTask(task.id)}
                       sx={{ width: { xs: '100%', sm: 'auto' }, borderRadius: '20px' }}
                     >
-                      Pause
+                      Cancel
                     </Button>
                   </Box>
                 </TableCell>

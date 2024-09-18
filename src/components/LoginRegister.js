@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  TextField, Button, Typography, Container, Grid, ToggleButton, ToggleButtonGroup,
+  TextField, Button, Typography, Container, ToggleButton, ToggleButtonGroup,
   Paper, Box, Avatar, CssBaseline, Link
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -57,8 +57,8 @@ function LoginRegister() {
               fullWidth
               sx={{ mb: 2 }}
             >
-              <ToggleButton value="user">Refugee</ToggleButton>
-              <ToggleButton value="company">Company</ToggleButton>
+              <ToggleButton value="user" sx={{ textTransform: 'none', }}>Individual</ToggleButton>
+              <ToggleButton value="company" sx={{ textTransform: 'none', }}>Company</ToggleButton>
             </ToggleButtonGroup>
             {!isLogin && userType === 'company' && (
               <TextField
@@ -129,7 +129,7 @@ function LoginRegister() {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={{ mt: 3, mb: 2, textTransform: 'none' }}
             >
               {isLogin ? 'Sign In' : 'Sign Up'}
             </Button>
